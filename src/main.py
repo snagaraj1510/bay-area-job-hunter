@@ -74,7 +74,7 @@ def run(backfill):
     # Step 3: Filter
     console.print("[bold cyan]Step 3/7:[/bold cyan] Filtering...")
     try:
-        filtered_df = job_filter.filter(deduped_df)
+        filtered_df = job_filter.filter_jobs(deduped_df)
         total_after_filter = len(filtered_df)
         console.print(f"  [green]{total_after_filter} jobs after filtering.[/green]")
     except Exception as exc:
@@ -99,7 +99,7 @@ def run(backfill):
     # Step 4: Score
     console.print("[bold cyan]Step 4/7:[/bold cyan] Scoring...")
     try:
-        scored_df = scorer.score(filtered_df)
+        scored_df = scorer.score_jobs(filtered_df)
         console.print(f"  [green]Scored {len(scored_df)} jobs.[/green]")
     except Exception as exc:
         console.print(f"  [red]Scoring failed: {exc}[/red]")
@@ -154,7 +154,7 @@ def run(backfill):
         if digest_jobs.empty:
             console.print("  [yellow]No qualifying jobs for digest.[/yellow]")
         else:
-            digest_builder.build_and_send(digest_jobs)
+            digest_builder.deliver(digest_jobs)
             job_ids = digest_jobs["id"].tolist()
             storage.mark_jobs_sent(job_ids)
             total_sent = len(job_ids)
@@ -243,7 +243,7 @@ def score():
 
     console.print(f"[cyan]Scoring {len(unscored_df)} jobs...[/cyan]")
     try:
-        scored_df = scorer.score(unscored_df)
+        scored_df = scorer.score_jobs(unscored_df)
     except Exception as exc:
         console.print(f"[red]Scoring failed: {exc}[/red]")
         return
@@ -280,7 +280,7 @@ def digest(min_score):
 
     console.print(f"[cyan]Building and sending digest for {len(jobs_df)} jobs...[/cyan]")
     try:
-        digest_builder.build_and_send(jobs_df)
+        digest_builder.deliver(jobs_df)
         job_ids = jobs_df["id"].tolist()
         storage.mark_jobs_sent(job_ids)
         console.print(f"[green]Digest sent. Marked {len(job_ids)} jobs as sent.[/green]")
