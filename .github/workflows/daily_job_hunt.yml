@@ -1,0 +1,53 @@
+name: Daily Job Hunt
+
+on:
+  schedule:
+    # 7 AM PST = 15:00 UTC (runs at 8 AM during PDT — close enough)
+    - cron: '0 15 * * *'
+  workflow_dispatch:  # allows manual trigger from GitHub UI
+
+jobs:
+  hunt:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # needed to commit the updated database back
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv sync
+        working-directory: .
+
+      - name: Write .env from secrets
+        run: |
+          cat > .env << 'EOF'
+          EMAIL_METHOD=gmail
+          GMAIL_ADDRESS=${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}
+          DIGEST_RECIPIENT=${{ secrets.DIGEST_RECIPIENT }}
+          DAILY_RUN_HOUR=7
+          TIMEZONE=America/Los_Angeles
+          EOF
+
+      - name: Run pipeline
+        run: uv run python -m src.main run
+
+      - name: Commit updated database
+        run: |
+          git config user.name "Bay Area Job Hunter"
+          git config user.email "actions@github.com"
+          git add data/jobs.db
+          git diff --staged --quiet || git commit -m "chore: update jobs.db [skip ci]"
+          git push

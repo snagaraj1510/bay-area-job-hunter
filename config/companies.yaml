@@ -1,0 +1,79 @@
+# Company tier list for scoring
+# Add companies as you encounter them; unknown defaults to tier 4
+
+tier_1:  # 15 points - top-tier tech
+  - Google
+  - Meta
+  - Apple
+  - Amazon
+  - Microsoft
+  - Stripe
+  - Airbnb
+  - Netflix
+  - Snowflake
+  - Databricks
+  - NVIDIA
+  - Salesforce
+  - ServiceNow
+  - Intuit
+  - Adobe
+  - Anthropic
+  - OpenAI
+
+tier_2:  # 12 points - strong growth / public tech
+  - Rubrik
+  - Rippling
+  - DoorDash
+  - Roblox
+  - Figma
+  - Notion
+  - Cloudflare
+  - MongoDB
+  - Elastic
+  - Confluent
+  - HashiCorp
+  - Atlassian
+  - Coinbase
+  - Block (Square)
+  - Plaid
+  - Brex
+  - Checkr
+  - Gusto
+  - Lyft
+  - Uber
+  - Pinterest
+  - Snap
+  - Palantir
+  - AMD
+  - LinkedIn
+  - AppZen
+  - Decagon
+  - BlackForest Labs
+
+tier_3:  # 8 points - solid tech companies
+  - HubSpot
+  - Zendesk
+  - DocuSign
+  - Asana
+  - Twilio
+  - Okta
+  - Palo Alto Networks
+  - CrowdStrike
+  - Zscaler
+  - SentinelOne
+  - UiPath
+  - Workday
+
+blocklist:
+  - Robert Half
+  - Randstad
+  - Adecco
+  - ManpowerGroup
+  - Kelly Services
+  - Hays
+  - Kforce
+  - Insight Global
+  - TEKsystems
+  - Apex Systems
+  - Jobot
+  - CyberCoders

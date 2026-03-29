@@ -1,0 +1,22 @@
+weights:
+  title_match: 30
+  description_keywords: 25
+  yoe_fit: 15
+  company_quality: 15
+  comp_range: 10
+  posting_freshness: 5
+
+thresholds:
+  minimum_score_for_digest: 40
+  highlight_score: 75
+  auto_save_score: 85
+
+freshness:
+  max_hours_full_points: 6
+  max_hours_most_points: 24
+  max_hours_some_points: 72
+  max_hours_few_points: 168
+
+yoe_sweet_spot:
+  min: 3
+  max: 6

@@ -1,0 +1,21 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Secrets — never commit
+.env
+
+# Digest HTML exports (large, ephemeral)
+data/digests/
+
+# Pytest / editor
+.pytest_cache/
+.ruff_cache/
+*.DS_Store

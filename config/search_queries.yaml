@@ -1,0 +1,48 @@
+# Modify these to adjust what gets scraped
+search_terms:
+  high_priority:
+    - "strategy operations"
+    - "business operations senior"
+    - "sales strategy operations"
+    - "revenue operations"
+    - "strategic finance"
+    - "GTM strategy"
+    - "go-to-market"
+
+  medium_priority:
+    - "FP&A senior"
+    - "corporate strategy"
+    - "business strategy"
+    - "chief of staff"
+    - "pricing strategy"
+    - "BizOps"
+    - "RevOps"
+
+  low_priority:
+    - "deal strategy"
+    - "partner operations"
+    - "merchant operations"
+    - "finance strategy"
+
+locations:
+  - "San Francisco, CA"
+  - "San Mateo, CA"
+  - "Palo Alto, CA"
+  - "Mountain View, CA"
+  - "San Jose, CA"
+  - "Oakland, CA"
+  - "Redwood City, CA"
+
+sites:
+  - indeed
+  - linkedin
+  - zip_recruiter
+  - google
+  - glassdoor
+
+settings:
+  results_per_site: 25
+  hours_old_daily: 24
+  hours_old_backfill: 168
+  delay_between_queries_sec: 4
+  distance_miles: 25
