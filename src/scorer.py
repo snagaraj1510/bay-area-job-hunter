@@ -59,10 +59,13 @@ class JobScorer:
         self,
         scoring_config_path="config/scoring.yaml",
         companies_config_path="config/companies.yaml",
+        candidate_profile_path="config/candidate_profile.yaml",
     ):
         self.scoring_config = self._load_yaml(scoring_config_path)
         self.companies_config = self._load_yaml(companies_config_path)
+        self.candidate_profile = self._load_yaml(candidate_profile_path)
         self.company_tier_lookup = self._build_company_tier_lookup()
+        self._build_keyword_sets()
 
     def _load_yaml(self, path: str) -> dict:
         config_path = Path(path)
@@ -70,6 +73,25 @@ class JobScorer:
             with open(config_path, "r", encoding="utf-8") as f:
                 return yaml.safe_load(f) or {}
         return {}
+
+    def _build_keyword_sets(self):
+        """Flatten candidate_profile.yaml competencies into scoring keyword sets."""
+        competencies = self.candidate_profile.get("candidate", {}).get("core_competencies", {})
+        background = self.candidate_profile.get("candidate", {}).get("background_signals", [])
+        tech_skills = self.candidate_profile.get("candidate", {}).get("technical_skills", {})
+
+        # All competency keywords (strategy, finance, ops, customer/growth)
+        self.profile_keywords = []
+        for category_keywords in competencies.values():
+            self.profile_keywords.extend(category_keywords)
+
+        # Background signals valued by employers (MBA, consulting, FP&A, etc.)
+        self.background_signals = background
+
+        # Technical tools
+        self.tech_keywords = []
+        for tool_list in tech_skills.values():
+            self.tech_keywords.extend(tool_list)
 
     def _build_company_tier_lookup(self) -> dict:
         lookup = {}
@@ -134,62 +156,51 @@ class JobScorer:
         score = 0
         matched_keywords = []
 
-        # MBA mention -> +5
+        # ── Tier 1: Background signals (5 pts each, cap at 10) ──────────────
+        # MBA mention
         if re.search(r"\bmba\b", desc_lower):
             score += 5
             matched_keywords.append("MBA")
 
-        # Consulting/IB/PE background -> +5
+        # Consulting / IB / PE background
         consulting_patterns = [
             r"\bconsulting\b",
             r"\binvestment banking\b",
-            r"\b(private equity|pe firm)\b",
+            r"\bprivate equity\b",
+            r"\bpe firm\b",
         ]
         for pat in consulting_patterns:
             if re.search(pat, desc_lower):
                 score += 5
-                matched_keywords.append(pat)
+                matched_keywords.append(pat.replace(r"\b", "").replace("\\", ""))
                 break
 
-        # Financial modeling / Excel / SQL -> +3
-        modeling_patterns = [r"\bfinancial modeling\b", r"\bexcel\b", r"\bsql\b"]
-        for pat in modeling_patterns:
-            if re.search(pat, desc_lower):
-                score += 3
-                matched_keywords.append(pat)
+        # ── Tier 2: Core competency keywords from candidate profile (2 pts each, cap at 10) ──
+        profile_hit_count = 0
+        for keyword in self.profile_keywords:
+            if profile_hit_count >= 5:
                 break
+            # Use word-boundary matching for short keywords, substring for phrases
+            if " " in keyword:
+                if keyword.lower() in desc_lower:
+                    score += 2
+                    matched_keywords.append(keyword)
+                    profile_hit_count += 1
+            else:
+                if re.search(r"\b" + re.escape(keyword.lower()) + r"\b", desc_lower):
+                    score += 2
+                    matched_keywords.append(keyword)
+                    profile_hit_count += 1
 
-        # Cross-functional / stakeholder management -> +3
-        collab_patterns = [r"\bcross[- ]functional\b", r"\bstakeholder management\b"]
-        for pat in collab_patterns:
-            if re.search(pat, desc_lower):
-                score += 3
-                matched_keywords.append(pat)
+        # ── Tier 3: Technical skill matches from candidate profile (1 pt each, cap at 5) ──
+        tech_hit_count = 0
+        for skill in self.tech_keywords:
+            if tech_hit_count >= 5:
                 break
-
-        # Board / executive presentations -> +3
-        pres_patterns = [r"\bboard\b", r"\bexecutive presentation"]
-        for pat in pres_patterns:
-            if re.search(pat, desc_lower):
-                score += 3
-                matched_keywords.append(pat)
-                break
-
-        # GTM / go-to-market -> +3
-        gtm_patterns = [r"\bgtm\b", r"\bgo[- ]to[- ]market\b"]
-        for pat in gtm_patterns:
-            if re.search(pat, desc_lower):
-                score += 3
-                matched_keywords.append(pat)
-                break
-
-        # Strategic planning / long-range plan -> +3
-        planning_patterns = [r"\bstrategic planning\b", r"\blong[- ]range plan\b"]
-        for pat in planning_patterns:
-            if re.search(pat, desc_lower):
-                score += 3
-                matched_keywords.append(pat)
-                break
+            if re.search(r"\b" + re.escape(skill.lower()) + r"\b", desc_lower):
+                score += 1
+                matched_keywords.append(skill)
+                tech_hit_count += 1
 
         capped_score = min(score, 25)
         return capped_score, matched_keywords

@@ -12,6 +12,17 @@ wheels/
 # Secrets — never commit
 .env
 
+# ── Personal / private data — never commit ──────────────────────────────────
+# Resume files (PDFs, DOCX) — contain personal contact info
+Tech Recruting Resumes/
+
+# Candidate profile extracted from resumes — contains personal details
+config/candidate_profile.yaml
+
+# SQLite DB — contains scraped job data tied to personal search
+data/jobs.db
+data/seen_jobs.json
+
 # Digest HTML exports (large, ephemeral)
 data/digests/
 
