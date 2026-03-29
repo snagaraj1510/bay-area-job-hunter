@@ -3,6 +3,7 @@ CLI entrypoint for Bay Area Job Hunter.
 Commands: run, scrape, score, digest, export, stats, mark, test-email, schedule
 """
 
+import os
 import sys
 import platform
 from datetime import datetime
@@ -19,6 +20,20 @@ from src.scorer import JobScorer
 from src.enricher import JobEnricher
 from src.digest import DigestBuilder
 from src.storage import JobStorage, generate_job_id
+
+
+def _build_scorer():
+    """Return LLM scorer if ANTHROPIC_API_KEY is set, otherwise rule-based scorer."""
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        try:
+            from src.llm_scorer import LLMJobScorer
+            console.print("[bold green]Using Claude agent scorer[/bold green] (ANTHROPIC_API_KEY detected)")
+            return LLMJobScorer()
+        except Exception as e:
+            console.print(f"[yellow]LLM scorer unavailable ({e}), falling back to rule-based scorer[/yellow]")
+    else:
+        console.print("[dim]Using rule-based scorer (set ANTHROPIC_API_KEY to enable Claude agent scoring)[/dim]")
+    return JobScorer()
 
 console = Console()
 
@@ -42,7 +57,7 @@ def run(backfill):
     scraper = JobScraper()
     deduplicator = Deduplicator()
     job_filter = JobFilter()
-    scorer = JobScorer()
+    scorer = _build_scorer()
     enricher = JobEnricher()
     digest_builder = DigestBuilder()
 
@@ -226,7 +241,7 @@ def score():
     console.rule("[bold blue]Score Unscored Jobs[/bold blue]")
 
     storage = JobStorage()
-    scorer = JobScorer()
+    scorer = _build_scorer()
 
     console.print("[cyan]Loading unscored jobs...[/cyan]")
     import sqlite3
