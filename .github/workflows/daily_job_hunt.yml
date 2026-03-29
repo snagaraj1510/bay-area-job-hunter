@@ -1,4 +1,5 @@
 name: Daily Job Hunt
+# Bay Area job scraper — runs at 7:30 AM EST
 
 on:
   schedule:
