@@ -1,10 +1,10 @@
 name: Daily Job Hunt
-# Bay Area job scraper — runs at 7:30 AM EST
+# Bay Area job scraper — runs at 10:00 AM EST
 
 on:
   schedule:
-    # 7:30 AM EST = 12:30 UTC (runs at 8:30 AM during EDT)
-    - cron: '30 12 * * *'
+    # 10:00 AM EST = 15:00 UTC (runs at 11:00 AM during EDT)
+    - cron: '0 15 * * *'
   workflow_dispatch:  # allows manual trigger from GitHub UI
 
 jobs:
